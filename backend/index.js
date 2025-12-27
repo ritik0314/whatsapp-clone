@@ -15,17 +15,22 @@ const PORT = process.env.PORT
 const app = express()
 
  // NO trailing slash
-// Configure CORS to allow the frontend development origin(s).
-// Accept both the configured FRONTEND_URL and common dev port 3001 (CRA fallback)
+// Configure CORS to allow production + development origins.
+// Use comma-separated ALLOWED_ORIGINS or single FRONTEND_URL from env, plus common local dev ports.
+const envAllowedOrigins = (process.env.ALLOWED_ORIGINS || process.env.FRONTEND_URL || '')
+  .split(',')
+  .map((s) => s.trim())
+  .filter(Boolean)
+
 const allowedOrigins = [
-  process.env.FRONTEND_URL,
+  ...envAllowedOrigins,
   'http://localhost:3000',
   'http://127.0.0.1:3000',
   'http://localhost:3001',
   'http://127.0.0.1:3001',
   'http://localhost:5173',
   'http://127.0.0.1:5173',
-].filter(Boolean);
+].filter(Boolean)
 
 app.use(
   cors({
