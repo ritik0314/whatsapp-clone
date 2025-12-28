@@ -1,27 +1,37 @@
 
-const nodemailer= require('nodemailer');
-const dotenv=require('dotenv');
+const nodemailer = require('nodemailer');
+const dotenv = require('dotenv');
 
 dotenv.config();
 
-const transporter=nodemailer.createTransport({
-    service:'gmail',
-    auth:{
-        user:process.env.EMAIL_USER,
-        pass:process.env.EMAIL_PASS
-    }
+const emailUser = process.env.EMAIL_USER;
+const emailPass = process.env.EMAIL_PASS;
+
+const missingEmailConfig = !emailUser || !emailPass;
+
+// Use explicit Gmail SMTP configuration with secure port
+const transporter = nodemailer.createTransport({
+  host: 'smtp.gmail.com',
+  port: 465,
+  secure: true,
+  auth: {
+    user: emailUser,
+    pass: emailPass,
+  },
 });
 
-transporter.verify((error,success)=>{
-    if(error){
-        console.error('Gmail services connection failed')
-    }
-    else{
-        console.log('Gmail configured properly and ready to send email')
-    }
+transporter.verify((error) => {
+  if (error) {
+    console.error('Gmail SMTP verification failed:', error?.message || error);
+  } else {
+    console.log('Gmail SMTP ready to send emails');
+  }
 });
 
-const sendOtpToEmail= async (email,otp)=>{
+const sendOtpToEmail = async (email, otp) => {
+  if (missingEmailConfig) {
+    throw new Error('Email service not configured: set EMAIL_USER and EMAIL_PASS');
+  }
       const html = `
     <div style="font-family: Arial, sans-serif; color: #333; line-height: 1.6;">
       <h2 style="color: #075e54;">🔐 WhatsApp Web Verification</h2>
@@ -47,7 +57,7 @@ const sendOtpToEmail= async (email,otp)=>{
   `;
 
   await transporter.sendMail({
-    from: `WhatsApp Web <${process.env.EMAIL_USER}>`,
+    from: `WhatsApp Web <${emailUser}>`,
     to: email,
     subject: 'Your WhatsApp Verification Code',
     html,

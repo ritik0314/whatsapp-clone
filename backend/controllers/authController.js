@@ -24,7 +24,12 @@ const sendOtp= async(req,res)=>{
             user.emailOtp=otp;
             user.emailOtpExpiry=expiry;
             await user.save();
-            await sendOtpToEmail(email,otp)
+            try {
+                await sendOtpToEmail(email, otp);
+            } catch (err) {
+                console.error('Failed to send email OTP:', err?.message || err);
+                return response(res,500,'Failed to send OTP email. Please check email configuration');
+            }
             return response(res,200,'Otp send to your email',{email});
         }
         if(!phoneNumber|| !phoneSuffix){
