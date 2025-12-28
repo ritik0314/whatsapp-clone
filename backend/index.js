@@ -14,6 +14,13 @@ dotenv.config()
 const PORT = process.env.PORT
 const app = express()
 
+app.use(cors({
+  origin: 'https://whatsapp-clone-2frontend.onrender.com',
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: true, // only if you need cookies/auth headers
+}))
+
  // NO trailing slash
 // Configure CORS to allow production + development origins.
 // Use comma-separated ALLOWED_ORIGINS or single FRONTEND_URL from env, plus common local dev ports.
