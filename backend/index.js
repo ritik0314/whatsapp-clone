@@ -23,6 +23,8 @@ const envAllowedOrigins = (process.env.ALLOWED_ORIGINS || process.env.FRONTEND_U
 
 const allowedOrigins = [
   ...envAllowedOrigins,
+  'https://whatsapp-clone-3frontend.onrender.com',
+  'https://whatsapp-clone-2frontend.onrender.com',
   'http://localhost:3000',
   'http://127.0.0.1:3000',
   'http://localhost:3001',
