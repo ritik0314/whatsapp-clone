@@ -4,22 +4,23 @@ const dotenv = require('dotenv');
 
 dotenv.config();
 
-const emailUser = process.env.EMAIL_USER;
-const emailPass = process.env.EMAIL_PASS;
+const emailUser = process.env.EMAIL_USER?.trim();
+const emailPass = process.env.EMAIL_PASS?.trim();
 
 const missingEmailConfig = !emailUser || !emailPass;
 
-// Use explicit Gmail SMTP configuration with secure port
+// Use Gmail SMTP with TLS (port 587) for better compatibility with hosting providers
 const transporter = nodemailer.createTransport({
   host: 'smtp.gmail.com',
-  port: 465,
-  secure: true,
+  port: 587,
+  secure: false, // Use TLS instead of SSL
+  requireTLS: true,
   auth: {
     user: emailUser,
     pass: emailPass,
   },
-  connectionTimeout: 10000,
-  socketTimeout: 10000,
+  connectionTimeout: 15000,
+  socketTimeout: 15000,
   greetingTimeout: 5000,
 });
 
@@ -33,9 +34,14 @@ transporter.verify((error) => {
 
 const sendOtpToEmail = async (email, otp) => {
   if (missingEmailConfig) {
-    throw new Error('Email service not configured: set EMAIL_USER and EMAIL_PASS');
+    const error = new Error('Email service not configured: set EMAIL_USER and EMAIL_PASS');
+    console.error('❌ Email Config Error:', error.message);
+    throw error;
   }
-      const html = `
+  
+  console.log(`📧 Attempting to send OTP to ${email} using ${emailUser}`);
+  
+  const html = `
     <div style="font-family: Arial, sans-serif; color: #333; line-height: 1.6;">
       <h2 style="color: #075e54;">🔐 WhatsApp Web Verification</h2>
       
@@ -59,12 +65,24 @@ const sendOtpToEmail = async (email, otp) => {
     </div>
   `;
 
-  await transporter.sendMail({
-    from: `WhatsApp Web <${emailUser}>`,
-    to: email,
-    subject: 'Your WhatsApp Verification Code',
-    html,
-  });
+  try {
+    const info = await transporter.sendMail({
+      from: `WhatsApp Web <${emailUser}>`,
+      to: email,
+      subject: 'Your WhatsApp Verification Code',
+      html,
+    });
+    console.log('✅ Email sent successfully:', info.response);
+    return info;
+  } catch (error) {
+    console.error('❌ Email send error:', {
+      message: error.message,
+      code: error.code,
+      command: error.command,
+      response: error.response,
+    });
+    throw error;
+  }
 };
 
 module.exports= sendOtpToEmail
