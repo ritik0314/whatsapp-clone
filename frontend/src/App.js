@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import './App.css';
 import Login from './pages/user-login/login';
 import { ToastContainer } from 'react-toastify';
@@ -54,6 +54,8 @@ function App() {
             <Route path='/setting' element={<Setting />} />
           </Route>
 
+          {/* Catch all unmatched routes */}
+          <Route path='*' element={<Navigate to='/' replace />} />
         </Routes>
       </Router>
     </>
